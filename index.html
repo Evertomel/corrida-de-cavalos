@@ -1,38 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>Corrida de Cavalos</title>
-  <link rel="stylesheet" href="intro.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<!-- body normal, sem texto solto -->
-<body class="hipodromo">
+  <!-- HEADER DINÂMICO -->
+  <div id="header-placeholder"></div>
 
-  <main class="container">
+  <div id="app">
+    <main>
+      <section id="track">
+        <div id="track-title">
+          Escolhe o modo em baixo. Clica num cavalo para o montar.
+        </div>
 
-    <!-- TELA 1 – INTRO COM O CAVALO -->
-    <section class="screen intro">
-      <div class="logo">
-        <img src="img/cavalo.png" class="logo-img" alt="Logo Cavalo">
-        <h1 class="logo-text">CAVALO 2</h1>
-      </div>
-    </section>
+        <div class="finish-line"></div>
+        <div id="horsesContainer"></div>
+      </section>
 
-    <!-- TELA 2 – TELA DO JOGO 2 -->
-    <section class="screen game-two">
-      <div class="content">
-        <p class="tag">Esse jogo pode ser prejudicial ao teclado(QUANDO JOGADO NO MODO CLIQUER)</p>
-        <h2>Corrida de Cavalos – Jogo 2</h2>
+      <section id="controls">
+        <div class="controls-row">
 
-        <p class="subtitle">
-          <a href="inicio.HTML" class="start-btn">Começar</a>
-        </p>
-      </div>
-    </section>
+          <div class="card">
+            <h2 class="card-title">Modo de jogo</h2>
 
-  </main>
+            <label>Selecionar modo:</label>
+            <select id="modeSelect">
+              <option value="observe">Observar</option>
+              <option value="bet">Apostar</option>
+              <option value="ride">Apostar + Montar</option>
+              <option value="multiplayer">Multijogador</option>
+            </select>
+
+            <button class="btn btn-primary" id="startRaceBtn">Iniciar corrida</button>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Carteira</h2>
+            <p>Saldo: <span id="walletBalance">0.00</span> créditos</p>
+
+            <input id="walletInput" type="number" placeholder="Adicionar créditos">
+            <button class="btn" id="walletAddBtn">Adicionar</button>
+          </div>
+
+        </div>
+
+        <div class="controls-row">
+
+          <div class="card">
+            <h2 class="card-title">Apostas</h2>
+
+            <label>Cavalo:</label>
+            <select id="betHorseSelect"></select>
+
+            <label>Valor:</label>
+            <input id="betAmount" type="number" min="5" step="5">
+
+            <button class="btn" id="placeBetBtn">Fazer aposta</button>
+            <p id="betMessage" class="hint"></p>
+          </div>
+
+          <div class="card">
+            <h2 class="card-title">Resumo</h2>
+            <div id="statsMiniText"></div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FOOTER DINÂMICO -->
+  <div id="footer-placeholder"></div>
 
   <script src="script.js"></script>
+
+  <script>
+    // Carrega header e footer
+    fetch("header.html").then(r => r.text()).then(h => {
+      document.getElementById("header-placeholder").innerHTML = h;
+    });
+
+    fetch("footer.html").then(r => r.text()).then(h => {
+      document.getElementById("footer-placeholder").innerHTML = h;
+    });
+  </script>
+
 </body>
 </html>
+
