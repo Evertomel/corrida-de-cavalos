@@ -1,0 +1,498 @@
+/* RESET + BASE */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Fundo geral */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f9fafb, #e5e7eb);
+  color: #111827;
+  padding-top: 60px;   /* espaço para o header externo */
+  padding-bottom: 50px;/* espaço para o footer externo */
+}
+
+/* Container principal do jogo */
+#app {
+  width: 90%;
+  max-width: 1100px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
+  padding: 20px;
+  margin: 0 auto;      /* centra no ecrã */
+}
+
+/* ================= HEADER EXTERNO ================= */
+
+#topbar {
+  height: 60px;
+  background: #1e293b;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+#topbar h1 {
+  font-size: 22px;
+}
+
+/* Mini perfil no header */
+.profile-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.profile-mini img {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 2px solid #38bdf8;
+}
+
+.profile-mini-name {
+  font-size: 13px;
+}
+
+.profile-mini-stats {
+  font-size: 11px;
+  color: #e5e7eb;
+}
+
+/* ================= FOOTER EXTERNO ================= */
+
+#bottombar {
+  height: 50px;
+  background: #1e293b;
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.25);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+/* ================= LAYOUT INTERNO ================= */
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* PISTA (TOPO) */
+#track {
+  background: #f3f4f6;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  min-height: 45vh;      /* pista ocupa boa parte da tela */
+}
+
+#track-title {
+  font-size: 14px;
+  margin-bottom: 8px;
+  color: #6b7280;
+}
+
+/* Linha de meta atravessando todas as pistas */
+.finish-line {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  right: 6%;
+  width: 6px;
+  border-radius: 999px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    #111827 0 6px,
+    transparent 6px 10px
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Container dos cavalos (fundo tipo hipódromo) */
+#horsesContainer {
+  margin-top: 8px;
+  padding: 20px;
+  background: #e0e7ff;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2px #c7d2fe;
+  position: relative;
+}
+
+/* Linha de cada cavalo */
+.horse-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+}
+
+/* “Cerca” entre os cavalos */
+.horse-row::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 6px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #b45309 0 18px,
+      transparent 18px 22px
+    );
+  border-bottom: 2px solid #92400e;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.horse-row:last-child::after {
+  display: none;
+}
+
+.horse-row:hover {
+  background: #e0ecff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+}
+
+.horse-row.mounted {
+  background: #dbeafe;
+  border: 1px solid #3b82f6;
+}
+
+/* Casinha do cavalo (estábulo) */
+.horse-stall {
+  width: 40px;
+  height: 34px;
+  border-radius: 4px;
+  background: #fed7aa;
+  border: 2px solid #b45309;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.horse-stall::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  background: #b45309;
+  clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+}
+
+.horse-stall::after {
+  content: "🐴";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+}
+
+/* Nome do cavalo */
+.horse-label {
+  width: 110px;
+  font-size: 12px;
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Pista individual */
+.horse-track {
+  flex: 1;
+  background: #e5e7eb;
+  border-radius: 999px;
+  border: 2px solid #d1d5db;
+  height: 30px;
+  overflow: visible;
+}
+
+/* Barra de progresso */
+.horse-bar {
+  position: relative;
+  height: 100%;
+  border-radius: 999px;
+  width: 0%;
+  transition: width 0.05s linear;
+}
+
+/* Cavalo na ponta da barra */
+.horse-icon {
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55px !important;
+  height: 55px !important;
+  object-fit: contain;
+  pointer-events: none;
+  display: block;
+  z-index: 10;
+}
+
+
+
+
+/* Cores diferentes por cavalo */
+.horse-row:nth-child(1) .horse-bar {
+  background: linear-gradient(90deg, #f97316, #fb923c);
+}
+.horse-row:nth-child(2) .horse-bar {
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+}
+.horse-row:nth-child(3) .horse-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+.horse-row:nth-child(4) .horse-bar {
+  background: linear-gradient(90deg, #a855f7, #c084fc);
+}
+.horse-row:nth-child(5) .horse-bar {
+  background: linear-gradient(90deg, #ec4899, #f472b6);
+}
+.horse-row:nth-child(6) .horse-bar {
+  background: linear-gradient(90deg, #facc15, #fbbf24);
+}
+.horse-row:nth-child(7) .horse-bar {
+  background: linear-gradient(90deg, #19164d, #401a53);
+}
+
+.horse-row:nth-child(8) .horse-bar {
+  background: linear-gradient(90deg, #00c6ff, #0084ff);
+}
+
+.horse-row:nth-child(9) .horse-bar {
+  background: linear-gradient(90deg, #ff6b6b, #ff9e9e);
+}
+
+.horse-row:nth-child(10) .horse-bar {
+  background: linear-gradient(90deg, #3a8d0b, #1fd675);
+}
+
+/* Multiplayer */
+.horse-row:nth-child(1).multiplayer .horse-bar {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+.horse-row:nth-child(2).multiplayer .horse-bar {
+  background: linear-gradient(90deg, #ef4444, #f97316);
+}
+
+/* CONTROLES EM BAIXO */
+#controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f3f4ff;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid #e5e7eb;
+  margin-top: 4px;
+}
+
+.controls-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  box-shadow: 0 4px 10px rgba(148, 163, 184, 0.12);
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Labels & inputs */
+label {
+  display: block;
+  font-size: 13px;
+  margin-top: 6px;
+  margin-bottom: 3px;
+  color: #374151;
+}
+
+input[type="number"],
+select {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  font-size: 13px;
+}
+
+/* Botões */
+.btn {
+  width: 100%;
+  padding: 8px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hint */
+.hint {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* Stats mini */
+.stats-mini {
+  font-size: 12px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+/* MODAL PERFIL */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 50;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  padding: 16px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.modal-close {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: #9ca3af;
+  font-size: 18px;
+}
+
+/* Perfil modal */
+.profile-modal-header {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.profile-picture-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  border: 2px solid #38bdf8;
+  object-fit: cover;
+  margin-bottom: 4px;
+}
+
+.profile-xp-text {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.profile-stats {
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #374151;
+}
+
+/* XP bar */
+.xp-bar {
+  width: 100%;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  border: 1px solid #d1d5db;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.xp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #a3e635);
+  width: 0%;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .controls-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hidden {
+  display: none !important;
+}

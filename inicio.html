@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Corrida de Cavalos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- HEADER EXTERNO -->
+  <div id="header-placeholder"></div>
+
+  <div id="app">
+    <main>
+      <!-- CORRIDA NO TOPO -->
+      <section id="track">
+        <div id="track-title">
+          Escolhe o modo em baixo. Clica num cavalo para o montar (nos modos com montaria).
+        </div>
+        <div class="finish-line"></div>
+        <div id="horsesContainer"></div>
+      </section>
+
+      <!-- CONTROLOS EM BAIXO -->
+      <section id="controls">
+        <div class="controls-row">
+          <!-- MODO DE JOGO -->
+          <div class="card" id="mode-card">
+            <h2 class="card-title">Modo de jogo</h2>
+            <label for="modeSelect">Seleciona o modo:</label>
+            <select id="modeSelect">
+              <option value="observe">Só observar</option>
+              <option value="bet">Apostar</option>
+              <option value="ride">Apostar + Montar</option>
+              <option value="multiplayer">Multijogador (2 jogadores)</option>
+            </select>
+
+            <button class="btn btn-primary" id="startRaceBtn">Iniciar corrida</button>
+
+            <p class="hint" id="modeHint">
+              Só observar: todos os cavalos correm sozinhos de forma aleatória.
+            </p>
+            <p class="hint">
+              🐎 Apostar + Montar: escolhe um cavalo em cima e usa a tecla <strong>Espaço</strong> para ele correr.
+            </p>
+            <p class="hint">
+              🎮 Multijogador: Jogador 1 = <strong>Espaço</strong>, Jogador 2 = <strong>Enter</strong>.
+            </p>
+          </div>
+
+          <!-- CARTEIRA -->
+          <div class="card" id="wallet-card">
+            <h2 class="card-title">Carteira</h2>
+            <p>Saldo: <span id="walletBalance">0.00</span> créditos</p>
+
+            <label for="walletInput">Adicionar créditos</label>
+            <input type="number" id="walletInput" min="1" step="1" placeholder="Ex: 100">
+            <button class="btn btn-secondary" id="walletAddBtn">Adicionar</button>
+
+            <p class="hint">
+              Usa dinheiro fictício para fazer apostas nos modos <strong>Apostar</strong> e <strong>Apostar + Montar</strong>.
+            </p>
+          </div>
+        </div>
+
+        <div class="controls-row">
+          <!-- APOSTAS -->
+          <div class="card" id="bet-card">
+            <h2 class="card-title">Apostas</h2>
+            <label for="betHorseSelect">Cavalo</label>
+            <select id="betHorseSelect"></select>
+
+            <label for="betAmount">Valor (múltiplo de 5)</label>
+            <input type="number" id="betAmount" min="5" step="5" placeholder="Ex: 25">
+
+            <button class="btn btn-secondary" id="placeBetBtn">Fazer aposta</button>
+
+            <p class="hint" id="betMessage">
+              No modo <strong>Apostar</strong> ou <strong>Apostar + Montar</strong> podes apostar antes de iniciar a corrida.
+            </p>
+          </div>
+
+          <!-- ESTATÍSTICAS RÁPIDAS -->
+          <div class="card" id="stats-card">
+            <h2 class="card-title">Resumo rápido</h2>
+            <div class="stats-mini" id="statsMiniText">
+              Corridas: 0<br>
+              1º: 0 · 2º: 0 · 3º: 0<br>
+              XP: 0
+            </div>
+            <p class="hint">
+              Estatísticas completas no perfil (clica na tua foto no topo).
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FOOTER EXTERNO -->
+  <div id="footer-placeholder"></div>
+
+<script>
+  // carregar header
+  fetch("header.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("header-placeholder").innerHTML = html;
+
+      // depois que o header existe, configura perfil e sincroniza avatar/stats
+      if (typeof carregarEstado === "function") {
+        carregarEstado();   // garante que miniAvatar também recebe o avatar
+      }
+      if (typeof configurarPerfil === "function") {
+        configurarPerfil();
+      }
+      if (typeof updateUI === "function") {
+        updateUI();
+      }
+    });
+
+  // carregar footer
+  fetch("footer.html")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("footer-placeholder").innerHTML = html;
+    });
+</script>
+
+
+  <!-- MODAL PERFIL -->
+  <div class="modal-backdrop" id="profileModalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Perfil do Jogador</h2>
+        <button class="modal-close" id="closeProfileBtn">&times;</button>
+      </div>
+
+      <div class="profile-modal-header">
+        <img id="profileAvatar" class="profile-picture-preview"
+             src="https://via.placeholder.com/80x80.png?text=Tu" alt="avatar">
+        <div>
+          <div id="profileName">Jogador</div>
+          <div id="profileXPText" class="profile-xp-text">XP: 0</div>
+          <div class="xp-bar">
+            <div class="xp-fill" id="xpFill"></div>
+          </div>
+        </div>
+      </div>
+
+      <label for="avatarInput">Foto de perfil</label>
+      <input type="file" id="avatarInput" accept="image/*">
+
+      <div class="profile-stats" id="profileStatsText">
+        Corridas: 0<br>
+        Vitórias: 0<br>
+        2º lugar: 0<br>
+        3º lugar: 0
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
