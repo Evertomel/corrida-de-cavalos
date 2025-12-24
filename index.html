@@ -38,7 +38,7 @@
             <button class="btn btn-primary" id="startRaceBtn">Iniciar corrida</button>
           </div>
 
-          <div class="card">
+          <div class="card" id="walletCard">
             <h2 class="card-title">Carteira</h2>
             <p>Saldo: <span id="walletBalance">0.00</span> créditos</p>
 
@@ -50,8 +50,8 @@
 
         <div class="controls-row">
 
-          <div class="card">
-            <h2 class="card-title">Apostas</h2>
+          <div class="card" id="betsCard">
+           <h2 class="card-title">Apostas</h2>
 
             <label>Cavalo:</label>
             <select id="betHorseSelect"></select>
@@ -78,16 +78,20 @@
 
   <script src="script.js"></script>
 
-  <script>
-    // Carrega header e footer
-    fetch("header.html").then(r => r.text()).then(h => {
-      document.getElementById("header-placeholder").innerHTML = h;
-    });
+<script>
+  fetch("header.html").then(r => r.text()).then(h => {
+    document.getElementById("header-placeholder").innerHTML = h;
 
-    fetch("footer.html").then(r => r.text()).then(h => {
-      document.getElementById("footer-placeholder").innerHTML = h;
-    });
-  </script>
+    // ✅ agora que o header existe, liga o perfil
+    if (typeof configurarPerfil === "function") configurarPerfil();
+    if (typeof updateUI === "function") updateUI();
+  });
+
+  fetch("footer.html").then(r => r.text()).then(h => {
+    document.getElementById("footer-placeholder").innerHTML = h;
+  });
+</script>
+
 
 </body>
 </html>

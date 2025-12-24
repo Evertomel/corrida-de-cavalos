@@ -1,4 +1,5 @@
 const DISTANCIA_TOTAL = 2000;
+let corridaIniciada = false;
 
 let cavalos = [];
 let numCavalosPadrao = 10;
@@ -82,8 +83,11 @@ function criarCavalos() {
   // reset seleção de cavalo montado
   indiceCavaloJogador = null;
 
+if (corridaIniciada) {
   desenharCavalos();
-  atualizarBetHorseSelect();
+}
+atualizarBetHorseSelect();
+
 }
 
 /* Desenhar cavalos na pista */
@@ -101,16 +105,13 @@ function desenharCavalos() {
       (mode === "multiplayer" ? " multiplayer" : "");
     row.dataset.index = index;
 
-    // Casinha / estábulo
     const stall = document.createElement("div");
     stall.className = "horse-stall";
 
-    // Nome
     const label = document.createElement("div");
     label.className = "horse-label";
     label.textContent = cavalo.nome;
 
-    // Pista e barra
     const track = document.createElement("div");
     track.className = "horse-track";
 
@@ -119,14 +120,17 @@ function desenharCavalos() {
     const perc = Math.min(100, (cavalo.posicao / DISTANCIA_TOTAL) * 100);
     bar.style.width = perc + "%";
 
-    // Cavalo na ponta da barra
-const icon = document.createElement("img");
-icon.className = "horse-icon";
-icon.src = "img/cavalocorrendo.gif";
-bar.appendChild(icon);
+    // Cavalo (GIF) na ponta da barra
+    const icon = document.createElement("img");
+    icon.className = "horse-icon";
+    icon.src = "img/cavalocorrendo.gif";
 
+    // ✅ só aparece depois de clicar Start
+    if (!corridaIniciada) {
+      icon.style.display = "none";
+    }
 
-
+    bar.appendChild(icon);
     track.appendChild(bar);
 
     row.appendChild(stall);
@@ -136,7 +140,7 @@ bar.appendChild(icon);
 
     // Clica para montar (modo ride)
     row.addEventListener("click", () => {
-      if (corridaAtiva) return; // não mudar durante corrida
+      if (corridaAtiva) return;
       if (mode === "ride") {
         indiceCavaloJogador = index;
         updateUI();
@@ -144,6 +148,7 @@ bar.appendChild(icon);
     });
   });
 }
+
 
 
 /* ---------- UI ---------- */
@@ -248,20 +253,33 @@ function updateUI() {
 function setMode(newMode) {
   if (corridaAtiva) {
     alert("Termina a corrida atual antes de mudar o modo.");
-    // voltar select para o modo antigo
     const modeSelect = document.getElementById("modeSelect");
     if (modeSelect) modeSelect.value = mode;
     return;
   }
+
   mode = newMode;
   currentBet = null;
+
+  // ✅ ao mudar modo, esconde cavalos até clicar Start
+  corridaIniciada = false;
+
   criarCavalos();
-  updateUI();
+  updateUI(); // vai limpar o horsesContainer por causa do desenharCavalos()
 }
+
 
 /* ---------- Corrida ---------- */
 function iniciarCorrida() {
   if (corridaAtiva) return;
+
+  // ✅ agora os cavalos podem aparecer
+  corridaIniciada = true;
+
+  // se ainda não tens cavalos (por algum motivo), cria
+  if (!cavalos || cavalos.length === 0) {
+    criarCavalos();
+  }
 
   // Reset posições
   cavalos.forEach(c => (c.posicao = 0));
@@ -271,15 +289,21 @@ function iniciarCorrida() {
   if (mode === "ride" && indiceCavaloJogador === null) {
     corridaAtiva = false;
     alert("Escolhe um cavalo em cima para montar antes de iniciar.");
+    // ✅ se não iniciou de verdade, volta a esconder
+    corridaIniciada = false;
+    desenharCavalos();
     return;
   }
 
-  // Corrida automática com intervalo (menos no multiplayer, onde o movimento vem do teclado)
+  // ✅ desenha já os cavalos no momento do start
+  desenharCavalos();
+
   clearInterval(intervaloCorrida);
   intervaloCorrida = setInterval(passoCorrida, 60);
 
   updateUI();
 }
+
 
 function passoCorrida() {
   if (!corridaAtiva) return;
@@ -504,35 +528,46 @@ function configurarTeclado() {
 }
 
 /* ---------- Perfil + Avatar ---------- */
+let perfilConfigurado = false;
+
 function configurarPerfil() {
   const backdrop = document.getElementById("profileModalBackdrop");
   const openBtn = document.getElementById("openProfileBtn");
   const closeBtn = document.getElementById("closeProfileBtn");
   const avatarInput = document.getElementById("avatarInput");
 
-  // se ainda não existe header (carregado por fetch), sai sem erro
-  if (!backdrop || !openBtn || !closeBtn || !avatarInput) return;
+  // espera o header aparecer e tenta de novo
+  if (!backdrop || !openBtn || !closeBtn || !avatarInput) {
+    setTimeout(configurarPerfil, 200);
+    return;
+  }
 
+  // ✅ evita adicionar listeners várias vezes
+  if (perfilConfigurado) return;
+  perfilConfigurado = true;
+
+  // ✅ ABRIR PERFIL
   openBtn.addEventListener("click", () => {
     backdrop.style.display = "flex";
-    updateUI();
+    if (typeof updateUI === "function") updateUI();
   });
 
+  // FECHAR
   closeBtn.addEventListener("click", () => {
     backdrop.style.display = "none";
   });
 
-  backdrop.addEventListener("click", e => {
-    if (e.target === backdrop) {
-      backdrop.style.display = "none";
-    }
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) backdrop.style.display = "none";
   });
 
-  avatarInput.addEventListener("change", e => {
+  // TROCAR AVATAR
+  avatarInput.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = function (ev) {
+    reader.onload = (ev) => {
       const url = ev.target.result;
       const mini = document.getElementById("miniAvatar");
       const profile = document.getElementById("profileAvatar");
@@ -543,6 +578,7 @@ function configurarPerfil() {
     reader.readAsDataURL(file);
   });
 }
+
 
 /* ---------- Setup inicial ---------- */
 window.addEventListener("DOMContentLoaded", () => {
