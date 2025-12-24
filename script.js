@@ -1,14 +1,12 @@
 const DISTANCIA_TOTAL = 2000;
 let corridaIniciada = false;
-
+let podeAvancar = true;
 let cavalos = [];
 let numCavalosPadrao = 10;
-
 let mode = "observe";           // observe | bet | ride | multiplayer
 let indiceCavaloJogador = null; // cavalo montado (single player)
 let corridaAtiva = false;
 let intervaloCorrida = null;
-
 let stats = {
   corridas: 0,
   vitorias: 0,
@@ -200,16 +198,19 @@ function updateUI() {
   }
 
   // Botão iniciar corrida
-  const startBtn = document.getElementById("startRaceBtn");
-  if (startBtn) {
-    if (mode === "multiplayer") {
-      startBtn.disabled = corridaAtiva; // basta clicar para começar
-    } else if (mode === "ride") {
-      startBtn.disabled = corridaAtiva || indiceCavaloJogador === null;
-    } else {
-      startBtn.disabled = corridaAtiva;
-    }
+const startBtn = document.getElementById("startRaceBtn");
+if (startBtn) {
+  if (mode === "multiplayer") {
+    startBtn.disabled = corridaAtiva;
+  } else if (mode === "ride") {
+    startBtn.disabled = corridaAtiva || indiceCavaloJogador === null;
+  } else if (mode === "bet") {
+    startBtn.disabled = corridaAtiva || currentBet === null; // ✅ aqui
+  } else {
+    startBtn.disabled = corridaAtiva;
   }
+}
+
 
   // Texto de modo
   const modeHint = document.getElementById("modeHint");
@@ -272,14 +273,25 @@ function setMode(newMode) {
 /* ---------- Corrida ---------- */
 function iniciarCorrida() {
   if (corridaAtiva) return;
+  // ✅ no modo apostar, tem que existir aposta antes de iniciar
+if (corridaAtiva) return;
 
-  // ✅ agora os cavalos podem aparecer
-  corridaIniciada = true;
+// ✅ no modo apostar, tem que existir aposta antes de iniciar
+if (mode === "bet" && !currentBet) {
+  showBetMessage("Faz uma aposta antes de iniciar a corrida.");
+  const amountInput = document.getElementById("betAmount");
+  if (amountInput) amountInput.focus();
+  return;
+}
 
-  // se ainda não tens cavalos (por algum motivo), cria
-  if (!cavalos || cavalos.length === 0) {
-    criarCavalos();
-  }
+// ✅ agora os cavalos podem aparecer
+corridaIniciada = true;
+
+// se ainda não tens cavalos (por algum motivo), cria
+if (!cavalos || cavalos.length === 0) {
+  criarCavalos();
+}
+
 
   // Reset posições
   cavalos.forEach(c => (c.posicao = 0));
@@ -376,6 +388,7 @@ function terminarCorrida() {
 
   // Processar aposta se existir (só em bet / ride)
   processBetResult(indices);
+  verificarCarteiraVazia();
 
   guardarEstado();
   updateUI();
@@ -486,46 +499,78 @@ function adicionarDinheiro() {
   updateWalletUI();
   guardarEstado();
 }
+function verificarCarteiraVazia() {
+  if (walletBalance > 0) return;
+
+  const querAdicionar = confirm(
+    "Carteira vazia. Queres adicionar mais créditos para continuar?"
+  );
+
+  if (querAdicionar) {
+    const input = document.getElementById("walletInput");
+    if (input) {
+      input.focus();
+    }
+  } else {
+    alert("Jogo terminado. Obrigado por jogar!");
+    // opcional: desativar botões principais
+    const startBtn = document.getElementById("startRaceBtn");
+    const betBtn = document.getElementById("placeBetBtn");
+    if (startBtn) startBtn.disabled = true;
+    if (betBtn) betBtn.disabled = true;
+  }
+}
 
 /* ---------- Controlo por teclado ---------- */
 function configurarTeclado() {
-  window.addEventListener("keydown", e => {
+  window.addEventListener("keyup", (e) => {   // ✅ keyup não repete ao segurar
     if (!corridaAtiva) return;
 
     if (mode === "ride") {
       if (e.code === "Space") {
         e.preventDefault();
+
         if (indiceCavaloJogador != null) {
-          cavalos[indiceCavaloJogador].posicao += 10;
+          // 🎲 avanço aleatório 1 a 4
+          const passo = Math.floor(Math.random() * 4) + 1;
+          cavalos[indiceCavaloJogador].posicao += passo;
+
           desenharCavalos();
+
           if (cavalos[indiceCavaloJogador].posicao >= DISTANCIA_TOTAL) {
             terminarCorrida();
           }
         }
       }
-    } else if (mode === "multiplayer") {
+      return;
+    }
+
+    if (mode === "multiplayer") {
       if (e.code === "Space") {
         e.preventDefault();
-        // Jogador 1
-        cavalos[0].posicao += 10;
+        // Jogador 1 (🎲 1 a 4)
+        const passo = Math.floor(Math.random() * 4) + 1;
+        cavalos[0].posicao += passo;
       } else if (e.code === "Enter") {
         e.preventDefault();
-        // Jogador 2
+        // Jogador 2 (🎲 1 a 4)
         if (cavalos[1]) {
-          cavalos[1].posicao += 10;
+          const passo = Math.floor(Math.random() * 4) + 1;
+          cavalos[1].posicao += passo;
         }
       } else {
         return;
       }
 
       desenharCavalos();
-      const terminou = cavalos.some(c => c.posicao >= DISTANCIA_TOTAL);
-      if (terminou) {
+
+      if (cavalos.some(c => c.posicao >= DISTANCIA_TOTAL)) {
         terminarCorrida();
       }
     }
   });
 }
+
 
 /* ---------- Perfil + Avatar ---------- */
 let perfilConfigurado = false;
